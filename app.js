@@ -5,7 +5,14 @@ const walletRoutes = require("./routes/walletRoutes");
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://courageous-snickerdoodle-7eba00.netlify.app",
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 app.use("/api/game", gameRoutes);
