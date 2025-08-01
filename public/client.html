@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crash Game Client</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    h2 { color: #333; }
+    #multiplier { font-size: 32px; color: #27ae60; }
+    button { margin-top: 10px; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>Crash Game Test Client</h2>
+  <div><strong>Round:</strong> <span id="round">N/A</span></div>
+  <div><strong>Multiplier:</strong> <span id="multiplier">1.00</span></div>
+  <div><strong>Crash Point:</strong> <span id="crash">Waiting...</span></div>
+
+  <button id="bet">Place Bet</button>
+  <button id="cashout">Cash Out</button>
+
+  <script>
+    const socket = io("http://localhost:5000");
+    const playerId = "player123"; 
+
+    document.getElementById("bet").onclick = () => {
+      const bet = {
+        playerId,
+        currency: "BTC",
+        price: 60000,
+        cryptoAmount: 0.0005,
+        usdValue: 30,
+      };
+      socket.emit("player:bet", bet);
+      console.log("Bet placed:", bet);
+    };
+
+    document.getElementById("cashout").onclick = () => {
+      socket.emit("player:cashout", { playerId, currency: "BTC" });
+      console.log("Cashout sent.");
+    };
+
+    socket.on("round:start", (data) => {
+      document.getElementById("round").innerText = data.roundId;
+      document.getElementById("crash").innerText = "Waiting...";
+      document.getElementById("multiplier").innerText = "1.00";
+    });
+
+    socket.on("round:multiplier", (data) => {
+      document.getElementById("multiplier").innerText = data.multiplier;
+    });
+
+    socket.on("round:crash", (data) => {
+      document.getElementById("crash").innerText = data.crashPoint;
+    });
+
+    socket.on("player:cashout", (data) => {
+      alert(
+        `Cashout Success! Multiplier: ${data.multiplier}, Crypto: ${data.payout}, USD: ${data.usdValue}`
+      );
+    });
+  </script>
+</body>
+</html>
